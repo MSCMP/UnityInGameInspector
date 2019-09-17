@@ -14,7 +14,7 @@ namespace UnityInGameInspector
 	/// </summary>
 	public class Inspector
 	{
-		bool isVisible = false;
+		public bool Visible = false;
 		List<Transform> rootTransforms = new List<Transform>();
 		Dictionary<Transform, bool> hierarchyOpen = new Dictionary<Transform, bool>();
 		bool filterItemX;
@@ -35,10 +35,6 @@ namespace UnityInGameInspector
 			this.controller = controller;
 
 			fsmEditor = new PlayMakerFSMEditor(this);
-		}
-
-		public void Show(bool show) {
-			isVisible = show;
 		}
 
 		public void Log(string message) {
@@ -79,7 +75,7 @@ namespace UnityInGameInspector
 		{
 			try
 			{
-				if (isVisible)
+				if (Visible)
 				{
 					// show hierarchy
 					GUILayout.BeginArea(new Rect(0, 0, 600, Screen.height));
@@ -114,7 +110,7 @@ namespace UnityInGameInspector
 					}
 				}
 
-				if ((fsmEditor != null) && (fsmEditor.IsPinned || isVisible))
+				if ((fsmEditor != null) && (fsmEditor.IsPinned || Visible))
 				{
 					fsmEditor.OnGUI();
 				}

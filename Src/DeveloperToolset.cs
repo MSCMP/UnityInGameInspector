@@ -8,20 +8,24 @@ namespace UnityInGameInspector {
 	public class InspectorController {
 		Inspector inspector = null;
 
-		delegate void LogDelegate(string message);
+		public delegate void LogDelegate(string message);
 		LogDelegate logDelegate;
 
-		InspectorController(LogDelegate logDelegate) {
+		public bool Visible {
+			get {
+				return inspector.Visible;
+			}
+			set {
+				inspector.Visible = value;
+			}
+		}
+
+		public InspectorController(LogDelegate logDelegate) {
 			this.logDelegate = logDelegate;
 
 			inspector = new Inspector(this);
 		}
 
-
-
-		public void Show(bool show) {
-			inspector.Show(show);
-		}
 
 		public void Log(string message) {
 			if (logDelegate != null) {

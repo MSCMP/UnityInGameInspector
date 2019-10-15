@@ -155,29 +155,27 @@ namespace UnityInGameInspector
 
 		private void RenderGraph(Fsm fsm) {
 			m_graphScrollView = GUILayout.BeginScrollView(m_graphScrollView, GUILayout.Width(m_windowRect.width * 0.4f));
+			GUILayout.BeginVertical();
 
 			foreach (var state in fsm.States) {
-				GUILayout.BeginVertical();
-
+				GUILayout.BeginHorizontal();
 				var previousColor = GUI.color;
+
+				string stateName = state.Name;
+				if (m_editedState == state) {
+					GUI.color = Color.yellow;
+					GUILayout.Box(">", GUILayout.Width(20.0f));
+				}
+				else {
+					GUI.color = Color.white;
+					GUILayout.Box(" ", GUILayout.Width(20.0f));
+				}
 
 				GUI.color = Color.red;
 
 				bool isActiveState = fsm.ActiveState == state;
 				if (isActiveState) {
 					GUI.color = Color.green;
-				}
-
-				string stateName = state.Name;
-				if (m_editedState == state) {
-					stateName += " (EDITED)";
-
-					if (isActiveState) {
-						GUI.color = SELECTED_ACTIVE_STATE_COLOR;
-					}
-					else {
-						GUI.color = Color.yellow;
-					}
 				}
 
 				if (GUILayout.Button(stateName)) {
@@ -188,18 +186,21 @@ namespace UnityInGameInspector
 						EditState(state);
 					}
 				}
+				GUILayout.EndHorizontal();
 
 				GUI.color = previousColor;
 
 				foreach (var transition in state.Transitions) {
+					GUILayout.BeginHorizontal();
+					GUILayout.Space(30.0f);
 					if (GUILayout.Button(transition.EventName + " -> " + transition.ToState)) {
 						EditState(fsm.GetState(transition.ToState));
 					}
+					GUILayout.EndHorizontal();
 				}
-
-				GUILayout.EndVertical();
 			}
 
+			GUILayout.EndVertical();
 			GUILayout.EndScrollView();
 		}
 

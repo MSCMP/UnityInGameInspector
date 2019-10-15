@@ -18,6 +18,7 @@ namespace UnityInGameInspector
 		List<Transform> rootTransforms = new List<Transform>();
 		Dictionary<Transform, bool> hierarchyOpen = new Dictionary<Transform, bool>();
 		bool filterItemX;
+		bool searchCasesensitive = false;
 		Vector2 hierarchyScrollPosition;
 		Transform inspect;
 		Vector2 inspectScrollPosition;
@@ -61,7 +62,8 @@ namespace UnityInGameInspector
 			}
 			else
 			{
-				rootTransforms = Object.FindObjectsOfType<Transform>().Where(x => x.name.Contains(keyword)).ToList();
+				var stringComparsion = searchCasesensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+				rootTransforms = Object.FindObjectsOfType<Transform>().Where(x => (x.name.IndexOf(keyword, stringComparsion) >= 0)).ToList();
 			}
 			rootTransforms.Sort(TransformNameAscendingSort);
 		}
@@ -87,7 +89,10 @@ namespace UnityInGameInspector
 					if (GUILayout.Button("Search"))
 						Search(search);
 
-					filterItemX = GUILayout.Toggle(filterItemX, "Filter itemx");
+					GUILayout.BeginHorizontal("box");
+					filterItemX = GUILayout.Toggle(filterItemX, "Filter out itemx");
+					searchCasesensitive = GUILayout.Toggle(searchCasesensitive, "Search case sensitive");
+					GUILayout.EndHorizontal();
 					foreach (var rootTransform in rootTransforms)
 					{
 						ShowHierarchy(rootTransform);

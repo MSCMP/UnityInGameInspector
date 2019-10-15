@@ -205,6 +205,24 @@ namespace UnityInGameInspector
 			GUILayout.EndScrollView();
 		}
 
+		private void CreateGUIForFsmOwnerDefault(FsmOwnerDefault ownerDefault) {
+			switch (ownerDefault.OwnerOption) {
+				case OwnerDefaultOption.SpecifyGameObject:
+					if (ownerDefault.GameObject.Value != null) {
+						if (GUILayout.Button(ownerDefault.GameObject.Value.name)) {
+							inspector.Inspect(ownerDefault.GameObject.Value.transform);
+						}
+					}
+					else {
+						GUILayout.Box("None");
+					}
+					break;
+				case OwnerDefaultOption.UseOwner:
+					GUILayout.Box("Use owner");
+					break;
+			}
+		}
+
 		private void RenderStateEditor(FsmState editedState, bool edit) {
 			GUILayout.BeginVertical("stateEditor");
 			GUILayout.BeginHorizontal();
@@ -217,10 +235,10 @@ namespace UnityInGameInspector
 			}
 
 			if (edit) {
-				GUILayout.Label(editedState.Name + " state editor");
+				GUILayout.Box(editedState.Name + " state editor");
 			}
 			else {
-				GUILayout.Label(editedState.Name + " current state preview");
+				GUILayout.Box(editedState.Name + " current state preview");
 			}
 			GUILayout.EndHorizontal();
 
@@ -240,32 +258,24 @@ namespace UnityInGameInspector
 							fieldValueStr = fieldValueStr.Substring(fieldValueStr.LastIndexOf(".", System.StringComparison.Ordinal) + 1);
 						}
 						if (fieldValue is FsmOwnerDefault) {
-							var property = fieldValue as FsmOwnerDefault;
-
-							switch (property.OwnerOption) {
-								case OwnerDefaultOption.SpecifyGameObject:
-									if (property.GameObject.Value != null) {
-										if (GUILayout.Button(property.GameObject.Value.name)) {
-											inspector.Inspect(property.GameObject.Value.transform);
-										}
-									}
-									else {
-										GUILayout.Box("None");
-									}
-									break;
-								case OwnerDefaultOption.UseOwner:
-									GUILayout.Box("Use owner");
-									break;
-							}
+							CreateGUIForFsmOwnerDefault(fieldValue as FsmOwnerDefault);
 						}
 						else if (fieldValue is FsmProperty) {
 							var property = fieldValue as FsmProperty;
 							GUILayout.Box("(" + property.PropertyName + ")");
-							GUILayout.Box("target: " + property.TargetObject + "");
+							UnityEngine.Object objectValue = property.TargetObject.Value;
+							if (objectValue is GameObject) {
+								if (GUILayout.Button("GameObject: " + property.TargetObject + "")) {
+									inspector.Inspect((objectValue as GameObject).transform);
+								}
+							}
+							else {
+								GUILayout.Box("Object: " + property.TargetObject + "");
+							}
 						}
 						else if (fieldValue is NamedVariable) {
 							var named = fieldValue as NamedVariable;
-							GUILayout.Box(fieldValueStr + "(" + named.Name + ")");
+							GUILayout.Box(named.Name + " [value: " + fieldValueStr + "]");
 						}
 						else if (fieldValue is FsmEvent) {
 							var evnt = fieldValue as FsmEvent;
@@ -282,6 +292,51 @@ namespace UnityInGameInspector
 
 							if (GUILayout.Button("Event " + evnt.Name + " -> " + targetStateName)) {
 								EditState(targetState);
+							}
+						}
+						else if (fieldValue is FsmEventTarget) {
+							var evtTarget = fieldValue as FsmEventTarget;
+
+							switch (evtTarget.target) {
+							case FsmEventTarget.EventTarget.Self:
+								GUILayout.Box("Self");
+								break;
+							case FsmEventTarget.EventTarget.GameObject:
+								GUILayout.Box("GameObject");
+								break;
+							case FsmEventTarget.EventTarget.GameObjectFSM:
+								GUILayout.Box("GameObjectFSM");
+								break;
+							case FsmEventTarget.EventTarget.FSMComponent:
+								GUILayout.Box("FSMComponent");
+								break;
+							case FsmEventTarget.EventTarget.BroadcastAll:
+								GUILayout.Box("BroadcastAll");
+								break;
+							case FsmEventTarget.EventTarget.HostFSM:
+								GUILayout.Box("HostFSM");
+								break;
+							case FsmEventTarget.EventTarget.SubFSMs:
+								GUILayout.Box("SubFSMs");
+								break;
+							}
+
+							if (evtTarget.excludeSelf.Value) {
+								GUILayout.Box("Ignore self");
+							}
+
+							CreateGUIForFsmOwnerDefault(evtTarget.gameObject);
+
+							GUILayout.Box("FSM: " + evtTarget.fsmName.Value);
+
+							if (evtTarget.sendToChildren.Value) {
+								GUILayout.Box("Send to children");
+							}
+
+							if (evtTarget.fsmComponent != null) {
+								if (GUILayout.Button(evtTarget.fsmComponent.FsmName)) {
+									StartEdit(evtTarget.fsmComponent);
+								}
 							}
 						}
 						else {

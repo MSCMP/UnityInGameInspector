@@ -115,6 +115,7 @@ namespace UnityInGameInspector
 			m_previousEditedStateScrollView = m_stateEditorScrollView;
 			m_previousEditedState = m_editedState;
 			m_editedState = state;
+			m_state = EditorState.State;
 		}
 
 		private void RenderEditor(Fsm fsm) {

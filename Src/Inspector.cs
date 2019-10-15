@@ -148,7 +148,17 @@ namespace UnityInGameInspector
 				foreach (var comp in trans.GetComponents<Component>())
 				{
 					var type = comp.GetType();
+
+					GUILayout.BeginHorizontal("box");
+
 					GUILayout.Label(type.ToString());
+
+					if (comp is Behaviour)
+					{
+						var behaviour = comp as Behaviour;
+						GUILayout.Box(behaviour.enabled ? "ON" : "OFF", GUILayout.Width(50.0f));
+					}
+					GUILayout.EndHorizontal();
 
 					if (comp is Transform)
 					{

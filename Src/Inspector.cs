@@ -162,6 +162,10 @@ namespace UnityInGameInspector
 					{
 						LightGUI(comp as Light);
 					}
+					else if (comp is Collider)
+					{
+						ColliderGUI(comp as Collider);
+					}
 					else
 					{
 						GenericsGUI(comp,flags);
@@ -176,6 +180,14 @@ namespace UnityInGameInspector
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Shadow bias:");
 			light.shadowBias = (float) Convert.ToDouble(GUILayout.TextField(light.shadowBias.ToString()));
+			GUILayout.EndHorizontal();
+		}
+
+		void ColliderGUI(Collider collider)
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.Box("Enabled:", GUILayout.Width(80.0f));
+			GUILayout.Box(collider.enabled ? "true" : "false");
 			GUILayout.EndHorizontal();
 		}
 

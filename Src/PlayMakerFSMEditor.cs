@@ -525,15 +525,28 @@ namespace UnityInGameInspector
 		private void RenderEventsEditor(Fsm fsm) {
 
 			foreach (var e in fsm.Events) {
-
 				GUILayout.BeginHorizontal("event");
-				GUILayout.Box(e.Name);
-
 				if (e.IsGlobal) {
 					GUILayout.Box("GLOBAL");
 				}
-
+				GUILayout.Box(e.Name);
 				GUILayout.EndHorizontal();
+			}
+
+			GUILayout.Label("Global transitions:");
+
+			foreach (var t in fsm.GlobalTransitions) {
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("- On " + t.EventName + " set state to ");
+				if (GUILayout.Button(t.ToState)) {
+					EditState(fsm.GetState(t.ToState));
+				}
+				GUILayout.EndHorizontal();
+			}
+
+			if (fsm.GlobalTransitions.Length == 0)
+			{
+				GUILayout.Label("- None");
 			}
 		}
 	}

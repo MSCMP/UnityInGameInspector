@@ -35,11 +35,14 @@ namespace UnityInGameInspector
 		private Vector2 m_previousEditedStateScrollView = new Vector2();
 		private FsmState m_previousEditedState = null;
 		private FsmState m_editedState = null;
+		static int m_idGenerator = 0;
+		int m_id = 0;
 
-		Inspector inspector = null;
+		Inspector m_inspector = null;
 
 		public PlayMakerFSMEditor(Inspector inspector) {
-			this.inspector = inspector;
+			m_inspector = inspector;
+			m_id = ++m_idGenerator;
 		}
 
 		public void StartEdit(PlayMakerFSM fsmComponent) {
@@ -58,7 +61,7 @@ namespace UnityInGameInspector
 
 			Fsm fsm = m_editedComponent.Fsm;
 			GameObject editedGameObject = m_editedComponent.gameObject;
-			m_windowRect = GUI.Window(1, m_windowRect, RenderWindow, "PlayMaker FSM Editor - " + fsm.Name + " (" + editedGameObject.name + ")");
+			m_windowRect = GUI.Window(m_id, m_windowRect, RenderWindow, "PlayMaker FSM Editor - " + fsm.Name + " (" + editedGameObject.name + ") #" + m_id);
 		}
 
 		private void RenderWindow(int windowID) {
@@ -74,13 +77,16 @@ namespace UnityInGameInspector
 
 				GUILayout.BeginHorizontal("buttons", GUILayout.Height(20.0f));
 				if (GUILayout.Button("Close")) {
-					StartEdit(null);
+					m_inspector.CloseFSMEditor(this);
 				}
 				if (GUILayout.Button(IsPinned ? "Unpin" : "Pin")) {
 					IsPinned = !IsPinned;
 				}
+				if (GUILayout.Button("Clone window")) {
+					m_inspector.OpenFSMEditor(m_editedComponent);
+				}
 				if (GUILayout.Button("Inspect owner game object")) {
-					inspector.Inspect(m_editedComponent.gameObject.transform);
+					m_inspector.Inspect(m_editedComponent.gameObject.transform);
 				}
 				GUILayout.EndHorizontal();
 
@@ -88,8 +94,8 @@ namespace UnityInGameInspector
 				GUI.DragWindow();
 			}
 			catch (Exception e) {
-				inspector.Log(e.Message);
-				inspector.Log(e.StackTrace);
+				m_inspector.Log(e.Message);
+				m_inspector.Log(e.StackTrace);
 			}
 		}
 
@@ -210,7 +216,7 @@ namespace UnityInGameInspector
 				case OwnerDefaultOption.SpecifyGameObject:
 					if (ownerDefault.GameObject.Value != null) {
 						if (GUILayout.Button(ownerDefault.GameObject.Value.name)) {
-							inspector.Inspect(ownerDefault.GameObject.Value.transform);
+							m_inspector.Inspect(ownerDefault.GameObject.Value.transform);
 						}
 					}
 					else {
@@ -266,7 +272,7 @@ namespace UnityInGameInspector
 							UnityEngine.Object objectValue = property.TargetObject.Value;
 							if (objectValue is GameObject) {
 								if (GUILayout.Button("GameObject: " + property.TargetObject + "")) {
-									inspector.Inspect((objectValue as GameObject).transform);
+									m_inspector.Inspect((objectValue as GameObject).transform);
 								}
 							}
 							else {
@@ -448,7 +454,7 @@ namespace UnityInGameInspector
 					}
 					else {
 						if (GUILayout.Button(typedVariable.Value.name)) {
-							inspector.Inspect(typedVariable.Value.transform);
+							m_inspector.Inspect(typedVariable.Value.transform);
 						}
 					}
 				}
@@ -527,15 +533,19 @@ namespace UnityInGameInspector
 			foreach (var e in fsm.Events) {
 				GUILayout.BeginHorizontal("event");
 				if (e.IsGlobal) {
-					GUILayout.Box("GLOBAL");
+					GUILayout.Box("GLOBAL", GUILayout.Width(60.0f));
+				}
+				else {
+					GUILayout.Box("LOCAL", GUILayout.Width(60.0f));
 				}
 				GUILayout.Box(e.Name);
 				GUILayout.EndHorizontal();
 			}
 
-			GUILayout.Label("Global transitions:");
+			GUILayout.Box("Global transitions:");
 
-			foreach (var t in fsm.GlobalTransitions) {
+			foreach (var t in fsm.GlobalTransitions)
+			{
 				GUILayout.BeginHorizontal();
 				GUILayout.Label("- On " + t.EventName + " set state to ");
 				if (GUILayout.Button(t.ToState)) {

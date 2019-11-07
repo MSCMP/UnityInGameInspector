@@ -28,14 +28,23 @@ namespace UnityInGameInspector
 		bool bindingFlagPublic;
 		bool bindingFlagNonPublic;
 
-		PlayMakerFSMEditor fsmEditor;
+		List<PlayMakerFSMEditor> fsmEditors = new List<PlayMakerFSMEditor>();
 
 		InspectorController controller;
 
 		public Inspector(InspectorController controller) {
 			this.controller = controller;
+		}
 
-			fsmEditor = new PlayMakerFSMEditor(this);
+		public PlayMakerFSMEditor OpenFSMEditor(PlayMakerFSM fsm) {
+			PlayMakerFSMEditor fsmEditor = new PlayMakerFSMEditor(this);
+			fsmEditor.StartEdit(fsm);
+			fsmEditors.Add(fsmEditor);
+			return fsmEditor;
+		}
+
+		public void CloseFSMEditor(PlayMakerFSMEditor editor) {
+			fsmEditors.Remove(editor);
 		}
 
 		public void Log(string message) {
@@ -115,8 +124,13 @@ namespace UnityInGameInspector
 					}
 				}
 
-				if ((fsmEditor != null) && (fsmEditor.IsPinned || Visible))
+				foreach (PlayMakerFSMEditor fsmEditor in fsmEditors)
 				{
+					if (!fsmEditor.IsPinned && !Visible)
+					{
+						continue;
+					}
+
 					fsmEditor.OnGUI();
 				}
 			}
@@ -287,7 +301,7 @@ namespace UnityInGameInspector
 			GUILayout.Label("Name: " + fsm.Fsm.Name);
 
 			if (GUILayout.Button("Edit FSM")) {
-				fsmEditor.StartEdit(fsm);
+				OpenFSMEditor(fsm);
 			}
 
 			GUILayout.EndVertical();
@@ -510,16 +524,23 @@ namespace UnityInGameInspector
 
 			GUILayout.BeginHorizontal("box");
 
+			if (trans.childCount > 0)
+			{
+				if (GUILayout.Button(hierarchyOpen[trans] ? "<" : ">", GUILayout.Width(20)))
+				{
+					hierarchyOpen[trans] = !hierarchyOpen[trans];
+				}
+			}
+			else
+			{
+				GUILayout.Box(" ", GUILayout.Width(20));
+			}
+
 			GUILayout.Label(trans.name);
 			if (GUILayout.Button("i", GUILayout.Width(20)))
 			{
 				inspect = trans;
 			}
-			var btn = GUILayout.Button(hierarchyOpen[trans] ? "<" : ">", GUILayout.Width(20));
-			if (hierarchyOpen[trans] && btn)
-				hierarchyOpen[trans] = false;
-			else if (!hierarchyOpen[trans] && btn)
-				hierarchyOpen[trans] = true;
 
 			GUILayout.EndHorizontal();
 

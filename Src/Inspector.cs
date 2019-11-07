@@ -176,6 +176,10 @@ namespace UnityInGameInspector
 					{
 						ColliderGUI(comp as Collider);
 					}
+					else if (comp is PlayMakerArrayListProxy)
+					{
+						PlayMakerArrayListProxyGUI(comp as PlayMakerArrayListProxy);
+					}
 					else
 					{
 						GenericsGUI(comp,flags);
@@ -199,6 +203,24 @@ namespace UnityInGameInspector
 			GUILayout.Box("Enabled:", GUILayout.Width(80.0f));
 			GUILayout.Box(collider.enabled ? "true" : "false");
 			GUILayout.EndHorizontal();
+		}
+
+		void PlayMakerArrayListProxyGUI(PlayMakerArrayListProxy arrayListProxy)
+		{
+			if (arrayListProxy.arrayList.Count > 0)
+			{
+				for (int i = 0; i < arrayListProxy.arrayList.Count; ++i)
+				{
+					GUILayout.BeginHorizontal();
+					GUILayout.Box("[" + i + "]", GUILayout.Width(30.0f));
+					GUILayout.Box(arrayListProxy.arrayList[i].ToString());
+					GUILayout.EndHorizontal();
+				}
+			}
+			else
+			{
+				GUILayout.Box("Array is empty");
+			}
 		}
 
 		void GenericsGUI(Component comp, BindingFlags flags)

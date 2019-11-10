@@ -30,6 +30,16 @@ namespace UnityInGameInspector
 		/// </summary>
 		private Vector2 m_stateEditorScrollView = new Vector2();
 
+		/// <summary>
+		/// Variable editor scroll view position.
+		/// </summary>
+		private Vector2 m_variableEditorScrollView = new Vector2();
+
+		/// <summary>
+		/// Event editor scroll view position.
+		/// </summary>
+		private Vector2 m_eventEditorScrollView = new Vector2();
+
 		public bool IsPinned = false;
 
 		private Vector2 m_previousEditedStateScrollView = new Vector2();
@@ -119,6 +129,7 @@ namespace UnityInGameInspector
 
 		private void EditState(FsmState state) {
 			m_previousEditedStateScrollView = m_stateEditorScrollView;
+
 			m_previousEditedState = m_editedState;
 			m_editedState = state;
 			m_state = EditorState.State;
@@ -484,7 +495,10 @@ namespace UnityInGameInspector
 			GUILayout.Box("Type", GUILayout.Width(60.0f));
 			GUILayout.Box("Name", GUILayout.Width(120.0f));
 			GUILayout.Box("Value");
+
 			GUILayout.EndHorizontal();
+
+			m_variableEditorScrollView = GUILayout.BeginScrollView(m_variableEditorScrollView);
 
 			foreach (var variable in fsm.Variables.TextureVariables) {
 				RenderVariableEditor(variable);
@@ -525,10 +539,14 @@ namespace UnityInGameInspector
 			foreach (var variable in fsm.Variables.Vector3Variables) {
 				RenderVariableEditor(variable);
 			}
+
+			GUILayout.EndScrollView();
 			GUILayout.EndVertical();
 		}
 
 		private void RenderEventsEditor(Fsm fsm) {
+
+			m_eventEditorScrollView = GUILayout.BeginScrollView(m_eventEditorScrollView);
 
 			foreach (var e in fsm.Events) {
 				GUILayout.BeginHorizontal("event");
@@ -558,6 +576,8 @@ namespace UnityInGameInspector
 			{
 				GUILayout.Label("- None");
 			}
+
+			GUILayout.EndScrollView();
 		}
 	}
 }
